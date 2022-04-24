@@ -15,6 +15,9 @@ class LoadingButton @JvmOverloads constructor(
 
     private val valueAnimator = ValueAnimator()
 
+    /**
+     * https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.properties/-delegates/observable.html
+     * */
     private var buttonState: ButtonState by Delegates.observable<ButtonState>(ButtonState.Completed) { p, old, new ->
 
     }
