@@ -8,7 +8,7 @@
     <string name="notification_description">The Project 3 repository is downloaded</string>
     <string name="notification_button">See changes</string>
 
-    <string name="button_name">Click me</string>
+    <string name="button_name">Download Now</string>
     <string name="button_loading">We are loading </string>
     <string name="title_activity_detail">DetailActivity</string>
 
@@ -20,4 +20,6 @@
     <string name="project_text">LoadApp - Current repository by Udacity</string>
     <string name="glide_text">Glide - Image Loading Library by BumpTech</string>
     <string name="go_back">Go Back</string>
+
+    <string name="no_choice_toast">Please select a file to download</string>
 </resources>
