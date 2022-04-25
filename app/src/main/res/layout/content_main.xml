@@ -76,6 +76,7 @@
         app:LoadingButton_indicatorColor="@color/white"
         app:LoadingButton_buttonText="@string/button_name"
         app:LoadingButton_loadingText="@string/button_loading"
+        app:LoadingButton_textSize="20sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

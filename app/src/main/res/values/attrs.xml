@@ -7,5 +7,6 @@
         <attr name="LoadingButton_indicatorColor" format="color" />
         <attr name="LoadingButton_buttonText" format="string" />
         <attr name="LoadingButton_loadingText" format="string" />
+        <attr name="LoadingButton_textSize" format="dimension" />
     </declare-styleable>
 </resources>

@@ -5,7 +5,6 @@ import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
-import androidx.core.content.ContextCompat
 import androidx.core.content.withStyledAttributes
 import kotlin.properties.Delegates
 
@@ -14,6 +13,9 @@ class LoadingButton @JvmOverloads constructor(
 ) : View(context, attrs, defStyleAttr) {
     private var widthSize = 0
     private var heightSize = 0
+
+//    val offsetX = -25f
+//    val offsetY = 30f
 
     private val valueAnimator = ValueAnimator()
 
@@ -30,16 +32,23 @@ class LoadingButton @JvmOverloads constructor(
     private var indicatorColor = 0
     private var buttonText = ""
     private var loadingText = ""
+    private var textSize = 0f
 
     private var path = Path()
 
     private val backgroundPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+//    private val shadowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+//        style = Paint.Style.FILL
+//        color = Color.BLACK
+//        maskFilter = BlurMaskFilter(100f, BlurMaskFilter.Blur.INNER)
+//    }
 
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
         textAlign = Paint.Align.CENTER
         textSize = 50.0f
         color = Color.WHITE
+        isFakeBoldText = true
     }
 
 
@@ -52,8 +61,10 @@ class LoadingButton @JvmOverloads constructor(
             indicatorColor = getColor(R.styleable.LoadingButton_LoadingButton_indicatorColor, 0)
             buttonText = getString(R.styleable.LoadingButton_LoadingButton_buttonText).toString()
             loadingText = getString(R.styleable.LoadingButton_LoadingButton_loadingText).toString()
+            textSize = getDimension(R.styleable.LoadingButton_LoadingButton_textSize, 50f)
         }
         textPaint.color = txtColor
+        textPaint.textSize = textSize
         backgroundPaint.color = bgColor
     }
 
@@ -62,12 +73,12 @@ class LoadingButton @JvmOverloads constructor(
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
         path.reset()
-        val roundRect = RectF(0f, 0f, width.toFloat(), height.toFloat())
+        val roundRect = RectF(0f, 0f, widthSize.toFloat(), heightSize.toFloat())
         path.addRoundRect(roundRect, 100f, 100f, Path.Direction.CCW)
         canvas?.clipPath(path)
         canvas?.drawColor(bgColor)
-        val centerX = measuredWidth.toFloat() / 2
-        val centerY = measuredHeight.toFloat() / 2 + (textPaint.textSize/3)
+        val centerX = widthSize.toFloat() / 2
+        val centerY = heightSize.toFloat() / 2 + (textPaint.textSize/3)
         if (buttonState == ButtonState.Completed) {
             canvas?.drawText(buttonText, centerX, centerY, textPaint)
         }
