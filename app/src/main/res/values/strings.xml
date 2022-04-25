@@ -11,4 +11,13 @@
     <string name="button_name">Click me</string>
     <string name="button_loading">We are loading </string>
     <string name="title_activity_detail">DetailActivity</string>
+
+    <string name="file_name_title">File name:</string>
+    <string name="status_title">Status:</string>
+    <string name="status">Success</string>
+
+    <string name="retrofit_text">Retrofit - Type-safe HTTP client for Android by Square, Inc.</string>
+    <string name="project_text">LoadApp - Current repository by Udacity</string>
+    <string name="glide_text">Glide - Image Loading Library by BumpTech</string>
+    <string name="go_back">Go Back</string>
 </resources>

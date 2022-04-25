@@ -43,7 +43,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun download() {
         val request =
-            DownloadManager.Request(Uri.parse(URL))
+            DownloadManager.Request(Uri.parse(REPOS.ND940C3.url))
                 .setTitle(getString(R.string.app_name))
                 .setDescription(getString(R.string.app_description))
                 .setRequiresCharging(false)
@@ -56,9 +56,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     companion object {
-        private const val URL =
-            "https://github.com/udacity/nd940-c3-advanced-android-programming-project-starter/archive/master.zip"
         private const val CHANNEL_ID = "channelId"
+    }
+
+    private enum class REPOS(val url: String) {
+        ND940C3("https://github.com/udacity/nd940-c3-advanced-android-programming-project-starter/archive/master.zip"),
+        GLIDE("https://github.com/bumptech/glide/archive/master.zip"),
+        RETROFIT("https://github.com/square/retrofit/archive/master.zip")
     }
 
 }
