@@ -1,6 +1,7 @@
 package com.udacity
 
 import android.app.DownloadManager
+import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
@@ -8,7 +9,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.database.Cursor
+import android.graphics.Color
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
@@ -17,6 +20,7 @@ import android.widget.RadioButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.coroutines.CoroutineScope
@@ -24,12 +28,19 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
+enum class Status{
+    FAILED,
+    SUCCESS
+}
+
 
 class MainActivity : AppCompatActivity() {
 
     private var downloadID: Long = 0
 
     private var selectedGitHubRepository: REPOS? = null
+
+    private var fileName = "Unknown file name"
 
     private lateinit var notificationManager: NotificationManager
     private lateinit var pendingIntent: PendingIntent
@@ -39,6 +50,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
+
+        notificationManager = ContextCompat.getSystemService(applicationContext, NotificationManager::class.java) as NotificationManager
+
+        createChannel(getString(R.string.notification_channel_id), getString(R.string.notification_channel_name))
 
         registerReceiver(receiver, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
 
@@ -50,6 +65,10 @@ class MainActivity : AppCompatActivity() {
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val id = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
+            val action = intent?.action
+            if (action.equals(DownloadManager.ACTION_DOWNLOAD_COMPLETE) && context != null){
+                notificationManager.sendNotification("Your download status is ready", fileName, context, Status.SUCCESS)
+            }
         }
     }
 
@@ -88,6 +107,7 @@ class MainActivity : AppCompatActivity() {
                             }
                             DownloadManager.STATUS_SUCCESSFUL -> {
                                 Log.i("MainActivity", "Download Successful")
+                                fileName = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI))
                                 finishDownload = true;
                             }
                             DownloadManager.STATUS_RUNNING -> {
@@ -124,6 +144,18 @@ class MainActivity : AppCompatActivity() {
             R.id.glide_radio -> REPOS.GLIDE
             R.id.retrofit_radio -> REPOS.RETROFIT
             else -> null
+        }
+    }
+
+    private fun createChannel(channelId: String, channelName: String) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val notificationChannel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH).apply {
+                enableLights(true)
+                lightColor = Color.RED
+                enableVibration(true)
+                description = "Download Status"
+            }
+            notificationManager.createNotificationChannel(notificationChannel)
         }
     }
 

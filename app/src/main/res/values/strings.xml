@@ -22,4 +22,7 @@
     <string name="go_back">Go Back</string>
 
     <string name="no_choice_toast">Please select a file to download</string>
+
+    <string name="notification_channel_name">downloading_app_repos</string>
+    <string name="notification_channel_id">downloading_app_repos_id</string>
 </resources>
