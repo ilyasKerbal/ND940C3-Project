@@ -42,6 +42,7 @@ class MainActivity : AppCompatActivity() {
 
     private var fileName = "Unknown file name"
 
+
     private lateinit var notificationManager: NotificationManager
     private lateinit var pendingIntent: PendingIntent
     private lateinit var action: NotificationCompat.Action
@@ -66,8 +67,21 @@ class MainActivity : AppCompatActivity() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val id = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
             val action = intent?.action
-            if (action.equals(DownloadManager.ACTION_DOWNLOAD_COMPLETE) && context != null){
-                notificationManager.sendNotification("Your download status is ready", fileName, context, Status.SUCCESS)
+            if (action.equals(DownloadManager.ACTION_DOWNLOAD_COMPLETE) && context != null && id != null){
+                val query = DownloadManager.Query()
+                query.setFilterById(id, 0)
+                val manager = context!!.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+                val cursor: Cursor = manager.query(query)
+                if (cursor.moveToFirst()){
+                    if (cursor.count > 0){
+                        val status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS))
+                        if (status == DownloadManager.STATUS_SUCCESSFUL) {
+                            notificationManager.sendNotification("Your download status is ready", fileName, context, Status.SUCCESS)
+                        }else{
+                            onFailError()
+                        }
+                    }
+                }
             }
         }
     }
@@ -97,17 +111,27 @@ class MainActivity : AppCompatActivity() {
                         when(status){
                             DownloadManager.STATUS_FAILED -> {
                                 Log.i("MainActivity", "Download Field")
+                                fileName = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_URI))
                                 finishDownload = true;
+                                onFailError()
                             }
                             DownloadManager.STATUS_PAUSED -> {
                                 Log.i("MainActivity", "Download paused")
+                                fileName = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_URI))
+                                finishDownload = true;
+                                onFailError()
+                                downloadManager.remove(downloadID)
                             }
                             DownloadManager.STATUS_PENDING -> {
                                 Log.i("MainActivity", "Download Pending")
+                                fileName = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_URI))
+                                finishDownload = true;
+                                onFailError()
+                                downloadManager.remove(downloadID)
                             }
                             DownloadManager.STATUS_SUCCESSFUL -> {
                                 Log.i("MainActivity", "Download Successful")
-                                fileName = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI))
+                                fileName = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_URI))
                                 finishDownload = true;
                             }
                             DownloadManager.STATUS_RUNNING -> {
@@ -157,6 +181,10 @@ class MainActivity : AppCompatActivity() {
             }
             notificationManager.createNotificationChannel(notificationChannel)
         }
+    }
+
+    fun onFailError() {
+        notificationManager.sendNotification("Something went wrong", fileName, this, Status.FAILED)
     }
 
 }
