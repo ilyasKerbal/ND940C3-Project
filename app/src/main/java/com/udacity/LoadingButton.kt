@@ -3,6 +3,7 @@ package com.udacity
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.*
+import android.os.Build
 import android.util.AttributeSet
 import android.view.View
 import androidx.core.content.withStyledAttributes
@@ -13,9 +14,6 @@ class LoadingButton @JvmOverloads constructor(
 ) : View(context, attrs, defStyleAttr) {
     private var widthSize = 0
     private var heightSize = 0
-
-//    val offsetX = -25f
-//    val offsetY = 30f
 
     private val valueAnimator = ValueAnimator()
 
@@ -37,11 +35,15 @@ class LoadingButton @JvmOverloads constructor(
     private var path = Path()
 
     private val backgroundPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-//    private val shadowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-//        style = Paint.Style.FILL
-//        color = Color.BLACK
-//        maskFilter = BlurMaskFilter(100f, BlurMaskFilter.Blur.INNER)
-//    }
+    private val shadowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.FILL
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            color = Color.argb(0.2f, 0f, 0f, 0f)
+        }else {
+            color = Color.BLACK
+        }
+        maskFilter = BlurMaskFilter(10f, BlurMaskFilter.Blur.NORMAL)
+    }
 
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
@@ -72,9 +74,11 @@ class LoadingButton @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
+        canvas?.translate(10f, 10f)
         path.reset()
         val roundRect = RectF(0f, 0f, widthSize.toFloat(), heightSize.toFloat())
         path.addRoundRect(roundRect, 100f, 100f, Path.Direction.CCW)
+        canvas?.drawPath(path, shadowPaint)
         canvas?.clipPath(path)
         canvas?.drawColor(bgColor)
         val centerX = widthSize.toFloat() / 2
@@ -92,8 +96,8 @@ class LoadingButton @JvmOverloads constructor(
             heightMeasureSpec,
             0
         )
-        widthSize = w
-        heightSize = h
+        widthSize = w - 20
+        heightSize = h - 20
         setMeasuredDimension(w, h)
     }
 
