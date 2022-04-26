@@ -126,8 +126,8 @@ class MainActivity : AppCompatActivity() {
                                 Log.i("MainActivity", "Download Pending")
                                 fileName = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_URI))
                                 finishDownload = true;
-                                onFailError()
-                                downloadManager.remove(downloadID)
+//                                onFailError()
+//                                downloadManager.remove(downloadID)
                             }
                             DownloadManager.STATUS_SUCCESSFUL -> {
                                 Log.i("MainActivity", "Download Successful")
