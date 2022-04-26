@@ -90,8 +90,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun download() {
-        setBtnState(ButtonState.Loading)
         selectedGitHubRepository?.let {
+            setBtnState(ButtonState.Loading)
             val request =
                 DownloadManager.Request(Uri.parse(selectedGitHubRepository!!.url))
                     .setTitle(getString(R.string.app_name))
