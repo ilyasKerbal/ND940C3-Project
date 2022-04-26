@@ -14,15 +14,9 @@ class LoadingButton @JvmOverloads constructor(
 ) : View(context, attrs, defStyleAttr) {
     private var widthSize = 0
     private var heightSize = 0
-
-    private val valueAnimator = ValueAnimator()
-
-    /**
-     * https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.properties/-delegates/observable.html
-     * */
-    private var buttonState: ButtonState by Delegates.observable<ButtonState>(ButtonState.Completed) { p, old, new ->
-
-    }
+    private var progress : Int = 0 // 0 to 100. Will be updated by the download manager
+    private var valueAnimator = ValueAnimator()
+    private var angle : Float = 0f
 
     private var bgColor = 0
     private var progressColor = 0
@@ -53,6 +47,9 @@ class LoadingButton @JvmOverloads constructor(
         isFakeBoldText = true
     }
 
+    private val progressPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.FILL
+    }
 
     init {
         isClickable = true
@@ -67,10 +64,39 @@ class LoadingButton @JvmOverloads constructor(
         }
         textPaint.color = txtColor
         textPaint.textSize = textSize
-        backgroundPaint.color = bgColor
+        backgroundPaint.color = progressColor
+        progressPaint.color = indicatorColor
     }
 
-
+    /**
+     * https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.properties/-delegates/observable.html
+     * */
+    private var buttonState: ButtonState by Delegates.observable<ButtonState>(ButtonState.Completed) { p, old, new ->
+        when (new){
+            ButtonState.Loading -> {
+                valueAnimator = ValueAnimator.ofFloat(0f, 360f).apply {
+                    addUpdateListener {
+                        angle = animatedValue as Float
+                        invalidate()
+                    }
+                    repeatMode = ValueAnimator.REVERSE
+                    repeatCount = ValueAnimator.INFINITE
+                    duration = 1000
+                    start()
+                }
+                disableLoadingButton()
+                invalidate()
+            }
+            ButtonState.Clicked -> {
+                //TODO: Nothing yet.
+            }
+            ButtonState.Completed -> {
+                enableLoadingButton()
+                progress = 0
+                invalidate()
+            }
+        }
+    }
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
@@ -83,8 +109,19 @@ class LoadingButton @JvmOverloads constructor(
         canvas?.drawColor(bgColor)
         val centerX = widthSize.toFloat() / 2
         val centerY = heightSize.toFloat() / 2 + (textPaint.textSize/3)
-        if (buttonState == ButtonState.Completed) {
-            canvas?.drawText(buttonText, centerX, centerY, textPaint)
+        when(buttonState) {
+            ButtonState.Completed -> {
+                textPaint.color = txtColor
+                canvas?.drawText(buttonText, centerX, centerY, textPaint)
+            }
+            ButtonState.Loading -> {
+                val rectWidth = ((progress * widthSize.toFloat())/100)
+                canvas?.drawRect(0f, 0f, rectWidth, heightSize.toFloat(), backgroundPaint)
+                textPaint.color = Color.WHITE
+                canvas?.drawText(loadingText, centerX, centerY, textPaint)
+                val ovalRect = RectF(widthSize-160f, 10f, widthSize-(-heightSize+180f), heightSize-10f)
+                canvas?.drawArc(ovalRect, 0f, angle, true, progressPaint)
+            }
         }
     }
 
@@ -100,5 +137,24 @@ class LoadingButton @JvmOverloads constructor(
         heightSize = h - 20
         setMeasuredDimension(w, h)
     }
+
+    fun setBtnState(state: ButtonState) {
+        buttonState = state
+    }
+
+    fun setProgress(p: Int) {
+        progress = p
+        invalidate()
+    }
+
+    private fun disableLoadingButton() {
+        isEnabled = false
+    }
+
+    private fun enableLoadingButton() {
+        isEnabled = true
+    }
+
+
 
 }

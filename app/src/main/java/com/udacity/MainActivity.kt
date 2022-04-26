@@ -22,6 +22,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.content_detail.*
 import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -82,11 +83,14 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                 }
+                setBtnState(ButtonState.Completed)
+                setBtnProgress(100)
             }
         }
     }
 
     private fun download() {
+        setBtnState(ButtonState.Loading)
         selectedGitHubRepository?.let {
             val request =
                 DownloadManager.Request(Uri.parse(selectedGitHubRepository!!.url))
@@ -114,6 +118,7 @@ class MainActivity : AppCompatActivity() {
                                 fileName = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_URI))
                                 finishDownload = true;
                                 onFailError()
+                                setBtnState(ButtonState.Completed)
                             }
                             DownloadManager.STATUS_PAUSED -> {
                                 Log.i("MainActivity", "Download paused")
@@ -121,11 +126,19 @@ class MainActivity : AppCompatActivity() {
                                 finishDownload = true;
                                 onFailError()
                                 downloadManager.remove(downloadID)
+                                setBtnState(ButtonState.Completed)
                             }
                             DownloadManager.STATUS_PENDING -> {
                                 Log.i("MainActivity", "Download Pending")
                                 fileName = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_URI))
-                                finishDownload = true;
+                                val total = cursor.getLong(cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES))
+                                if (total >= 0) {
+                                    val downloaded = cursor.getLong(cursor.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR))
+                                    progress = ((downloaded * 100L) / total).toInt();
+                                    setBtnProgress(progress)
+                                    Log.i("MainActivity", "Download progress: $progress")
+                                }
+                                //finishDownload = true;
 //                                onFailError()
 //                                downloadManager.remove(downloadID)
                             }
@@ -133,14 +146,24 @@ class MainActivity : AppCompatActivity() {
                                 Log.i("MainActivity", "Download Successful")
                                 fileName = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_URI))
                                 finishDownload = true;
+                                setBtnState(ButtonState.Completed)
+                                setBtnProgress(100)
                             }
                             DownloadManager.STATUS_RUNNING -> {
                                 val total = cursor.getLong(cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES))
                                 if (total >= 0) {
                                     val downloaded = cursor.getLong(cursor.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR))
                                     progress = ((downloaded * 100L) / total).toInt();
+                                    setBtnProgress(progress)
                                     Log.i("MainActivity", "Download progress: $progress")
                                 }
+                            }
+                            else -> {
+                                finishDownload = true;
+                                onFailError()
+                                downloadManager.remove(downloadID)
+                                setBtnProgress(100)
+                                setBtnState(ButtonState.Completed)
                             }
                         }
                     }
@@ -185,6 +208,18 @@ class MainActivity : AppCompatActivity() {
 
     fun onFailError() {
         notificationManager.sendNotification("Something went wrong", fileName, this, Status.FAILED)
+    }
+
+    fun setBtnState(state: ButtonState) {
+        this@MainActivity.runOnUiThread {
+            custom_button.setBtnState(state)
+        }
+    }
+
+    fun setBtnProgress(p: Int) {
+        this@MainActivity.runOnUiThread {
+            custom_button.setProgress(p)
+        }
     }
 
 }
